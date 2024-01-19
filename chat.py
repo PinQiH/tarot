@@ -1,7 +1,7 @@
 import openai
 import os
 
-api_key = os.getenv('API_KEY')
+openai.api_key = os.getenv('API_KEY')
 
 
 class ChatTarot:

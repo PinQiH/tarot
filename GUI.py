@@ -4,21 +4,23 @@ from typing import List, Tuple, Any, Generator, Dict
 
 from chat import ChatTarot
 from tarot import TarotDeck
+from personas import CURRENT_PERSONA
 
 class MeowTarotApp:
     def __init__(self):
         css = ReadText("asset/style.css")
-        # Gradio 4.x/5.x/6.x font definition
         font = [gr.themes.GoogleFont("Noto Sans Mono")]
         theme = gr.themes.Soft(font=font)
 
-        with gr.Blocks(css=css, theme=theme, title="薯條塔羅") as self.app:
+        self.persona = CURRENT_PERSONA
+
+        with gr.Blocks(css=css, theme=theme, title=self.persona.title) as self.app:
             self.stop_event = gr.State(None)
             self.resp = gr.State("")
             self.deck = gr.State(TarotDeck())
-            self.chat_tarot = gr.State(ChatTarot())
+            self.chat_tarot = gr.State(ChatTarot(self.persona.system_prompt))
             
-            gr.Markdown("# 🐱 薯條貓貓塔羅", elem_id="title")
+            gr.Markdown(f"# {self.persona.title}", elem_id="title")
             
             with gr.Row():
                 with gr.Column():
@@ -30,14 +32,14 @@ class MeowTarotApp:
             self.RegisterEvents()
 
     def Launch(self):
-        self.app.queue().launch(favicon_path="asset/RoundCat.png", share=True)
+        # Removed favicon_path="asset/RoundCat.png" as it's no longer a cat theme
+        self.app.queue().launch(share=True)
 
     def InitLeftColumn(self):
         with gr.Group():
-            # New format: List of dicts
-            self.welcome = [{"role": "assistant", "content": "有什麼事情要問本喵呢？"}]
-            self.chat = gr.Chatbot(label="薯條貓貓占卜大師", value=self.welcome, height=600)
-            self.msg = gr.Textbox(label="問題", placeholder="喵喵喵，讓本喵來幫你解答心中的疑惑！")
+            self.welcome = [{"role": "assistant", "content": self.persona.welcome}]
+            self.chat = gr.Chatbot(label=self.persona.title, value=self.welcome, height=600)
+            self.msg = gr.Textbox(label="問題", placeholder="請輸入你想問的問題...", interactive=True)
             with gr.Row():
                 self.send = gr.Button("🌙  抽牌")
                 self.clear = gr.Button("🗑️  清除")
@@ -49,7 +51,7 @@ class MeowTarotApp:
         with gr.Group():
             self.tarot_name = gr.Textbox(label="塔羅牌名稱")
             self.image = gr.Image(label="塔羅牌", interactive=False, height=400)
-            self.info = gr.TextArea(label="塔羅牌資訊", lines=1)
+            self.info = gr.TextArea(label="塔羅牌資訊", lines=20)
 
     def RegisterEvents(self):
         inn_send = [self.msg, self.chat, self.deck, self.chat_tarot]
@@ -83,9 +85,7 @@ class MeowTarotApp:
             
         tarot_path, tarot_info, tarot_name = deck.Pick()
         
-        # Append user message
         chat.append({"role": "user", "content": msg})
-        # Append empty assistant message for streaming
         chat.append({"role": "assistant", "content": ""})
         
         sys_prompt, user_prompt = tarot.BuildPrompt(msg, tarot_name, tarot_info)
@@ -100,7 +100,6 @@ class MeowTarotApp:
         if not resp_generator or isinstance(resp_generator, str):
             return
 
-        # Update the last message (assistant's response)
         try:
             for r in resp_generator:
                 if stop_event.is_set():
@@ -113,7 +112,8 @@ class MeowTarotApp:
             yield history
 
     def Clear(self):
-        return self.welcome, None, None, None
+        welcome = [{"role": "assistant", "content": self.persona.welcome}]
+        return welcome, None, None, None
 
     def TriggerStop(self, stop_event):
         if isinstance(stop_event, Event):

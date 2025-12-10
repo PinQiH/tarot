@@ -1,17 +1,17 @@
-# 塔羅 (Tarot)
+# 命運塔羅 (Destiny Tarot)
 
-這是一個結合了可愛貓咪人格的塔羅牌占卜應用程式。透過 OpenAI 的 GPT 模型，薯條貓貓大師將為您解讀塔羅牌的奧秘，並給予正面積極的建議。
+這是一個專業、神秘且富有智慧的塔羅牌占卜應用程式。透過 OpenAI 的 GPT 模型，「命運觀測者」將為您解讀塔羅牌的奧秘，並給予深刻且富有哲理的指引。
 
 ## 特色
 
-- **貓咪占卜師**：以「喵喵」為口頭禪的可愛占卜風格。
+- **專業占卜師**：以「命運觀測者」為名的經典占卜風格，語氣平和、客觀且充滿智慧。
 - **完整塔羅牌組**：包含 78 張塔羅牌（正位與逆位）。
-- **互動式介面**：使用 Gradio 建構的友善使用者介面。
-- **即時解牌**：利用 OpenAI API 進行即時的塔羅牌義解讀。
+- **現代化介面**：使用最新版 Gradio (6.x) 建構的響應式 Web 介面。
+- **即時解牌**：利用 OpenAI API (GPT-4o) 進行即時的塔羅牌義解讀。
 
 ## 前置需求 (Prerequisites)
 
-- Python 3.7 或更高版本
+- Python 3.10 或更高版本
 - OpenAI API Key
 
 ## 安裝 (Installation)
@@ -23,13 +23,25 @@
     cd tarot
     ```
 
-2.  **安裝依賴套件 (Install dependencies)**
+2.  **建立虛擬環境 (Create Virtual Environment)**
+
+    建議使用虛擬環境來管理套件：
+
+    ```powershell
+    # 建立名為 tarot 的虛擬環境
+    python -m venv tarot
+
+    # 啟動虛擬環境 (Windows)
+    .\tarot\Scripts\activate
+    ```
+
+3.  **安裝依賴套件 (Install dependencies)**
 
     ```bash
     pip install -r requirements.txt
     ```
 
-3.  **設定環境變數 (Setup Environment Variables)**
+4.  **設定環境變數 (Setup Environment Variables)**
 
     在專案根目錄下建立一個 `.env` 檔案，並填入您的 OpenAI API Key：
 
@@ -37,11 +49,9 @@
     OPENAI_API_KEY=sk-your_api_key_here
     ```
 
-    或者您可以參考 `.env.example` (如果有的話) 或直接修改 `.env` 檔案。
-
 ## 使用方法 (Usage)
 
-執行以下指令啟動應用程式：
+確保虛擬環境已啟動，然後執行以下指令：
 
 ```bash
 python main.py
@@ -52,8 +62,8 @@ python main.py
 ## 技術棧 (Technologies Used)
 
 - [Python](https://www.python.org/)
-- [Gradio](https://gradio.app/) - 用於建構 Web 介面
-- [OpenAI API](https://openai.com/) - 用於生成占卜結果
+- [Gradio](https://gradio.app/) (v6.x) - 用於建構 Web 介面
+- [OpenAI API](https://openai.com/) (v1.x) - 用於生成占卜結果
 
 ## 參考資料 (Reference)
 

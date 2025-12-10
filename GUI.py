@@ -47,6 +47,16 @@ class MeowTarotApp:
             
             gr.Markdown(f"# {self.persona.title}", elem_id="title")
             
+            # Spread Selector Row (Top)
+            with gr.Row():
+                self.spread_dropdown = gr.Dropdown(
+                    choices=[(s.name, s.key) for s in SPREADS.values()],
+                    value="single",
+                    label="選擇牌陣",
+                    interactive=True
+                )
+
+            # Main Content Columns
             with gr.Row():
                 with gr.Column():
                     self.InitLeftColumn()
@@ -61,13 +71,6 @@ class MeowTarotApp:
 
     def InitLeftColumn(self):
         with gr.Group():
-            self.spread_dropdown = gr.Dropdown(
-                choices=[(s.name, s.key) for s in SPREADS.values()],
-                value="single",
-                label="選擇牌陣",
-                interactive=True
-            )
-            
             self.welcome = [{"role": "assistant", "content": self.persona.welcome}]
             self.chat = gr.Chatbot(label=self.persona.title, value=self.welcome, height=600)
             self.msg = gr.Textbox(label="問題", placeholder="請輸入你想問的問題...", interactive=True)
@@ -88,9 +91,10 @@ class MeowTarotApp:
                 columns=[2], 
                 rows=[2], 
                 object_fit="contain", 
-                height="auto"
+                height=600
             )
-            self.info = gr.TextArea(label="塔羅牌資訊", lines=20)
+            with gr.Accordion("塔羅牌資訊", open=False):
+                self.info = gr.TextArea(show_label=False, lines=20)
 
     def RegisterEvents(self):
         inn_send = [self.msg, self.spread_dropdown, self.chat, self.deck, self.chat_tarot]
@@ -119,6 +123,7 @@ class MeowTarotApp:
 
     def SendMessage(self, msg: str, spread_key: str, chat: List[Dict[str, str]], deck: TarotDeck, tarot: ChatTarot):
         if not msg:
+            gr.Warning("請先輸入你想問的問題！")
             return gr.update(), chat, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), Event()
             
         spread = SPREADS[spread_key]
@@ -162,7 +167,7 @@ class MeowTarotApp:
 
     def Clear(self):
         welcome = [{"role": "assistant", "content": self.persona.welcome}]
-        return welcome, None, None, None
+        return welcome, None, None
 
     def TriggerStop(self, stop_event):
         if isinstance(stop_event, Event):

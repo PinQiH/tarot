@@ -65,6 +65,3 @@ python main.py
 - [Gradio](https://gradio.app/) (v6.x) - 用於建構 Web 介面
 - [OpenAI API](https://openai.com/) (v1.x) - 用於生成占卜結果
 
-## 參考資料 (Reference)
-
-- [IT邦幫忙文章](https://ithelp.ithome.com.tw/articles/10323720)

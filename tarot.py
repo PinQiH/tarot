@@ -1,7 +1,7 @@
 import json
 import os
 import random
-from typing import Tuple, Dict, Any
+from typing import Tuple, Dict, Any, List
 
 class TarotDeck:
     def __init__(self):
@@ -16,22 +16,26 @@ class TarotDeck:
         self.deck = list(range(78)) # 共有78張牌
         random.shuffle(self.deck)
 
-    def Pick(self) -> Tuple[str, str, str]:
-        if not self.deck:
+    def Pick(self, count: int = 1) -> List[Tuple[str, str, str]]:
+        if len(self.deck) < count:
             self.InitDeck()
 
-        idx = self.deck.pop() # 返回最後一張牌的索引
-        path_suffix, data_key, name_prefix = IsReverse()
+        picked_cards = []
+        for _ in range(count):
+            idx = self.deck.pop() # 返回最後一張牌的索引
+            path_suffix, data_key, name_prefix = IsReverse()
 
-        fn = f"{idx:02d}{path_suffix}.jpg"
-        tarot_path = os.path.join(self.tarot_path, fn)
+            fn = f"{idx:02d}{path_suffix}.jpg"
+            tarot_path = os.path.join(self.tarot_path, fn)
 
-        data = self.tarot_data[f"{idx:02d}"]
-        tarot_name = data["name"]
-        tarot_name = f"{name_prefix}{tarot_name}"
-        tarot_info = data[data_key]
+            data = self.tarot_data[f"{idx:02d}"]
+            tarot_name = data["name"]
+            tarot_name = f"{name_prefix}{tarot_name}"
+            tarot_info = data[data_key]
+            
+            picked_cards.append((tarot_path, tarot_info, tarot_name))
 
-        return tarot_path, tarot_info, tarot_name
+        return picked_cards
 
 
 def IsReverse() -> Tuple[str, str, str]:

@@ -5,16 +5,41 @@ from typing import List, Tuple, Any, Generator, Dict
 from chat import ChatTarot
 from tarot import TarotDeck
 from personas import CURRENT_PERSONA
+from spreads import SPREADS
 
 class MeowTarotApp:
     def __init__(self):
         css = ReadText("asset/style.css")
-        font = [gr.themes.GoogleFont("Noto Sans Mono")]
-        theme = gr.themes.Soft(font=font)
+        
+        # Dark Mystic Theme
+        theme = gr.themes.Soft(
+            primary_hue=gr.themes.colors.purple,
+            secondary_hue=gr.themes.colors.indigo,
+            neutral_hue=gr.themes.colors.slate,
+            font=[gr.themes.GoogleFont("Noto Sans Mono")]
+        ).set(
+            body_background_fill="*neutral_950",
+            block_background_fill="*neutral_900",
+            block_border_width="1px",
+            block_title_text_weight="600",
+            block_label_text_weight="600",
+            block_label_text_size="*text_md"
+        )
 
         self.persona = CURRENT_PERSONA
 
-        with gr.Blocks(css=css, theme=theme, title=self.persona.title) as self.app:
+        # js to force dark mode
+        js_func = """
+        function refresh() {
+            const url = new URL(window.location);
+            if (url.searchParams.get('__theme') !== 'dark') {
+                url.searchParams.set('__theme', 'dark');
+                window.location.href = url.href;
+            }
+        }
+        """
+
+        with gr.Blocks(css=css, theme=theme, title=self.persona.title, js=js_func) as self.app:
             self.stop_event = gr.State(None)
             self.resp = gr.State("")
             self.deck = gr.State(TarotDeck())
@@ -32,35 +57,48 @@ class MeowTarotApp:
             self.RegisterEvents()
 
     def Launch(self):
-        # Removed favicon_path="asset/RoundCat.png" as it's no longer a cat theme
         self.app.queue().launch(share=True)
 
     def InitLeftColumn(self):
         with gr.Group():
+            self.spread_dropdown = gr.Dropdown(
+                choices=[(s.name, s.key) for s in SPREADS.values()],
+                value="single",
+                label="選擇牌陣",
+                interactive=True
+            )
+            
             self.welcome = [{"role": "assistant", "content": self.persona.welcome}]
             self.chat = gr.Chatbot(label=self.persona.title, value=self.welcome, height=600)
             self.msg = gr.Textbox(label="問題", placeholder="請輸入你想問的問題...", interactive=True)
             with gr.Row():
-                self.send = gr.Button("🌙  抽牌")
+                self.send = gr.Button("🌙  抽牌", variant="primary")
                 self.clear = gr.Button("🗑️  清除")
-                self.stop = gr.Button("🛑 停止")
+                self.stop = gr.Button("🛑 停止", variant="stop")
             with gr.Accordion("完整提示", open=False) as self.fold:
                 self.debug_msg = gr.TextArea(show_label=False, lines=14)
 
     def InitRightColumn(self):
         with gr.Group():
-            self.tarot_name = gr.Textbox(label="塔羅牌名稱")
-            self.image = gr.Image(label="塔羅牌", interactive=False, height=400)
+            # Gallery for multiple cards
+            self.gallery = gr.Gallery(
+                label="塔羅牌", 
+                show_label=True, 
+                elem_id="gallery", 
+                columns=[2], 
+                rows=[2], 
+                object_fit="contain", 
+                height="auto"
+            )
             self.info = gr.TextArea(label="塔羅牌資訊", lines=20)
 
     def RegisterEvents(self):
-        inn_send = [self.msg, self.chat, self.deck, self.chat_tarot]
+        inn_send = [self.msg, self.spread_dropdown, self.chat, self.deck, self.chat_tarot]
         out_send = [
             self.msg,
             self.chat,
-            self.image,
+            self.gallery,
             self.info,
-            self.tarot_name,
             self.resp,
             self.debug_msg,
             self.stop_event,
@@ -75,26 +113,37 @@ class MeowTarotApp:
         submit_event.then(self.ShowResponse, inn_show, out_show)
         click_event.then(self.ShowResponse, inn_show, out_show)
 
-        out_clear = [self.chat, self.tarot_name, self.image, self.info]
+        out_clear = [self.chat, self.gallery, self.info]
         self.clear.click(self.Clear, None, out_clear)
         self.stop.click(self.TriggerStop, self.stop_event, queue=False)
 
-    def SendMessage(self, msg: str, chat: List[Dict[str, str]], deck: TarotDeck, tarot: ChatTarot):
+    def SendMessage(self, msg: str, spread_key: str, chat: List[Dict[str, str]], deck: TarotDeck, tarot: ChatTarot):
         if not msg:
             return gr.update(), chat, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), Event()
             
-        tarot_path, tarot_info, tarot_name = deck.Pick()
+        spread = SPREADS[spread_key]
+        picked_cards = deck.Pick(spread.card_count)
         
+        # Prepare gallery data: list of (image_path, label)
+        gallery_data = []
+        info_text = ""
+        
+        for i, (path, info, name) in enumerate(picked_cards):
+            position = spread.positions[i] if i < len(spread.positions) else f"位置{i+1}"
+            label = f"{position}: {name}"
+            gallery_data.append((path, label))
+            info_text += f"【{position}】{name}\n{info}\n\n"
+
         chat.append({"role": "user", "content": msg})
         chat.append({"role": "assistant", "content": ""})
         
-        sys_prompt, user_prompt = tarot.BuildPrompt(msg, tarot_name, tarot_info)
+        sys_prompt, user_prompt = tarot.BuildPrompt(msg, picked_cards, spread.positions)
         
         resp_generator = tarot.Chat(user_prompt)
         
         prompt = f"System: {sys_prompt}\n\nUser: {user_prompt}"
         
-        return "", chat, tarot_path, tarot_info, tarot_name, resp_generator, prompt, Event()
+        return "", chat, gallery_data, info_text, resp_generator, prompt, Event()
 
     def ShowResponse(self, history: List[Dict[str, str]], resp_generator: Generator, tarot: ChatTarot, stop_event: Event):
         if not resp_generator or isinstance(resp_generator, str):

@@ -17,7 +17,7 @@ classic_prompt = (
 
 classic_persona = Persona(
     name="classic",
-    title="🔮 命運塔羅",
+    title="命運塔羅",
     welcome="歡迎來到命運的交會點，我是你的引路人...",
     system_prompt=classic_prompt
 )

@@ -1,3 +1,235 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Noto+Serif+TC:wght@400;700&display=swap');
+
+/* Global Background */
+body,
+.gradio-container {
+  background: url('file/asset/star_bg.jpg') no-repeat center center fixed !important;
+  background-size: cover !important;
+  font-family: 'Cinzel', 'Noto Serif TC', 'KaiTi', 'DFKai-SB', serif !important;
+}
+
+/* Typography - Global */
+* {
+  font-family: 'Cinzel', 'Noto Serif TC', 'KaiTi', 'DFKai-SB', serif !important;
+}
+
+/* Title */
 #title {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  color: #FFD700 !important;
+  /* Gold */
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+  font-size: 3.5em !important;
+  font-weight: 700 !important;
+  margin: 0 auto 1rem auto !important;
+  letter-spacing: 2px;
+  position: relative;
+  width: fit-content;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#title * {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#title h1 {
+  color: #FFD700 !important;
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+  font-family: 'Cinzel', 'Noto Serif TC', 'KaiTi', 'DFKai-SB', serif !important;
+  margin: 0 !important;
+  display: inline-block !important;
+  font-weight: 700 !important;
+}
+
+#title::before,
+#title::after {
+  content: "✴";
+  font-size: 0.8em;
+  justify-content: space-between !important;
+}
+
+/* Inputs & Textareas - Custom Image Background */
+input,
+textarea,
+select,
+.gr-input,
+.gr-box {
+  background: url('file/asset/input.png') !important;
+  /* Custom Parchment/Texture */
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  border: 1px solid rgba(212, 175, 55, 0.8) !important;
+  color: #FFD700 !important;
+  /* Dark Indigo for contrast on parchment/light input */
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  font-family: 'Cinzel', 'Noto Serif TC', 'KaiTi', 'DFKai-SB', serif !important;
+  text-shadow: 0 0 2px #000 !important;
+}
+
+/* Dropdown specific fixes */
+.gradio-dropdown {
+  background: transparent !important;
+}
+
+.gradio-dropdown .wrap-inner {
+  font-family: 'Cinzel', 'Noto Serif TC', 'KaiTi', 'DFKai-SB', serif !important;
+  background: url('file/asset/input.png') !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  border: 1px solid rgba(212, 175, 55, 0.8) !important;
+  border-radius: 8px !important;
+}
+
+.gradio-dropdown input {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.item:hover,
+.choice:hover {
+  background: rgba(255, 215, 0, 0.2) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #FFD700 !important;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6) !important;
+}
+
+/* Remove default gray backgrounds */
+.gradio-container .bg-gray-50,
+.gradio-container .bg-gray-200,
+.gradio-container .dark\:bg-gray-900 {
+  background: transparent !important;
+}
+
+/* Buttons - Magic Crystal Ball Style */
+button.primary {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.5), rgba(255, 140, 0, 0.5)) !important;
+  /* Gold to Deep Orange - Semi-transparent */
+  color: #2E0854 !important;
+  border: 1px solid rgba(255, 215, 0, 0.6) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.3) !important;
+  transition: all 0.3s ease !important;
+  border-radius: 25px !important;
+  /* More rounded */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  backdrop-filter: blur(5px);
+}
+
+button.primary:hover {
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.6) !important;
+  transform: scale(1.05);
+  background: linear-gradient(135deg, rgba(255, 140, 0, 0.7), rgba(255, 215, 0, 0.7)) !important;
+}
+
+/* Standard Buttons (Clear, Stop) */
+button:not(.primary) {
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  /* Increased visibility but still transparent */
+  color: #FFD700 !important;
+  border-radius: 12px !important;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(3px);
+}
+
+button:not(.primary):hover {
+  background: rgba(255, 215, 0, 0.2) !important;
+  border-color: rgba(212, 175, 55, 0.8) !important;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
+
+/* Stop Button */
+button.stop {
+  background: rgba(139, 0, 0, 0.4) !important;
+  /* Dark Red - More transparent */
+  border: 1px solid rgba(255, 69, 0, 0.6) !important;
+  color: #FFF !important;
+  backdrop-filter: blur(3px);
+}
+
+/* Chatbot Bubbles */
+.message.user {
+  background: rgba(255, 215, 0, 0.15) !important;
+  border: 1px solid rgba(255, 215, 0, 0.3) !important;
+  border-radius: 15px 15px 0 15px !important;
+  color: #FFD700 !important;
+}
+
+.message.bot {
+  background: rgba(138, 43, 226, 0.15) !important;
+  border: none !important;
+  /* Removed border to fix 'bars' issue */
+  border-radius: 15px 15px 15px 0 !important;
+  color: #FFD700 !important;
+  /* Gold Text for Bot */
+  box-shadow: none !important;
+}
+
+.message.bot p,
+.message.bot span,
+.message.bot div {
+  color: #FFD700 !important;
+  font-family: 'Cinzel', 'Noto Serif TC', 'KaiTi', 'DFKai-SB', serif !important;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Gallery */
+#gallery {
+  border: 1px solid #D4AF37 !important;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Scrollbars - Custom Gold */
+::-webkit-scrollbar {
+  width: 10px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #D4AF37, #8B4513);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #FFD700, #A0522D);
+}
+
+/* Labels */
+label span {
+  color: #FFD700 !important;
+  font-weight: bold;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Intro Image Fill */
+#intro_image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+#intro_image img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
 }

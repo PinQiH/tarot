@@ -57,44 +57,60 @@ class MeowTarotApp:
                 )
 
             # Main Content Columns
-            with gr.Row():
+            with gr.Row(equal_height=True):
                 with gr.Column():
                     self.InitLeftColumn()
 
                 with gr.Column():
                     self.InitRightColumn()
 
+            # Bottom Info Area
+            with gr.Row():
+                with gr.Column():
+                    with gr.Accordion("完整提示", open=False) as self.fold:
+                        self.debug_msg = gr.TextArea(show_label=False, lines=14)
+                
+                with gr.Column():
+                    with gr.Accordion("塔羅牌資訊", open=False):
+                        self.info = gr.TextArea(show_label=False, lines=20)
+
             self.RegisterEvents()
 
     def Launch(self):
-        self.app.queue().launch(share=True)
+        self.app.queue().launch(share=True, allowed_paths=["asset"])
 
     def InitLeftColumn(self):
-        with gr.Group():
+        with gr.Group(elem_classes="main-panel"):
             self.welcome = [{"role": "assistant", "content": self.persona.welcome}]
-            self.chat = gr.Chatbot(label=self.persona.title, value=self.welcome, height=600)
-            self.msg = gr.Textbox(label="問題", placeholder="請輸入你想問的問題...", interactive=True)
-            with gr.Row():
-                self.send = gr.Button("🌙  抽牌", variant="primary")
-                self.clear = gr.Button("🗑️  清除")
-                self.stop = gr.Button("🛑 停止", variant="stop")
-            with gr.Accordion("完整提示", open=False) as self.fold:
-                self.debug_msg = gr.TextArea(show_label=False, lines=14)
+            self.chat = gr.Chatbot(label=self.persona.title, value=self.welcome, height=600, show_label=False)
+            # Control Panel
+            with gr.Group():
+                with gr.Row():
+                    self.msg = gr.Textbox(label="問題", placeholder="在此輸入你想問的問題...", interactive=True, show_label=False, scale=4)
+                    self.send = gr.Button("🌙  抽牌", variant="primary", scale=1)
+                with gr.Row():
+                    self.clear = gr.Button("🗑️  清除")
+                    self.stop = gr.Button("🛑 停止", variant="stop")
 
     def InitRightColumn(self):
-        with gr.Group():
+        with gr.Group(elem_classes="main-panel"):
+            # Gallery for multiple cards
             # Gallery for multiple cards
             self.gallery = gr.Gallery(
                 label="塔羅牌", 
-                show_label=True, 
+                show_label=False, 
                 elem_id="gallery", 
                 columns=[2], 
                 rows=[2], 
                 object_fit="contain", 
-                height=600
+                height=600,
+                visible=False
             )
-            with gr.Accordion("塔羅牌資訊", open=False):
-                self.info = gr.TextArea(show_label=False, lines=20)
+            
+            # Placeholder Group
+            with gr.Group(visible=True) as self.intro_group:
+                gr.Image("asset/background.png", show_label=False, interactive=False, height=600, container=False, elem_id="intro_image")
+                gr.Markdown("<h3 style='text-align: center; opacity: 0.7; color: #FFD700; margin-top: 20px;'>心中的疑惑，牌卡皆有解答... 請點擊左側開始抽牌</h3>")
 
     def RegisterEvents(self):
         inn_send = [self.msg, self.spread_dropdown, self.chat, self.deck, self.chat_tarot]
@@ -106,6 +122,7 @@ class MeowTarotApp:
             self.resp,
             self.debug_msg,
             self.stop_event,
+            self.intro_group,
         ]
         
         submit_event = self.msg.submit(self.SendMessage, inn_send, out_send)
@@ -117,14 +134,14 @@ class MeowTarotApp:
         submit_event.then(self.ShowResponse, inn_show, out_show)
         click_event.then(self.ShowResponse, inn_show, out_show)
 
-        out_clear = [self.chat, self.gallery, self.info]
+        out_clear = [self.chat, self.gallery, self.info, self.intro_group]
         self.clear.click(self.Clear, None, out_clear)
         self.stop.click(self.TriggerStop, self.stop_event, queue=False)
 
     def SendMessage(self, msg: str, spread_key: str, chat: List[Dict[str, str]], deck: TarotDeck, tarot: ChatTarot):
         if not msg:
             gr.Warning("請先輸入你想問的問題！")
-            return gr.update(), chat, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), Event()
+            return gr.update(), chat, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), Event(), gr.update()
             
         spread = SPREADS[spread_key]
         picked_cards = deck.Pick(spread.card_count)
@@ -148,7 +165,7 @@ class MeowTarotApp:
         
         prompt = f"System: {sys_prompt}\n\nUser: {user_prompt}"
         
-        return "", chat, gallery_data, info_text, resp_generator, prompt, Event()
+        return "", chat, gr.update(value=gallery_data, visible=True), info_text, resp_generator, prompt, Event(), gr.update(visible=False)
 
     def ShowResponse(self, history: List[Dict[str, str]], resp_generator: Generator, tarot: ChatTarot, stop_event: Event):
         if not resp_generator or isinstance(resp_generator, str):
@@ -167,7 +184,7 @@ class MeowTarotApp:
 
     def Clear(self):
         welcome = [{"role": "assistant", "content": self.persona.welcome}]
-        return welcome, None, None
+        return welcome, gr.update(visible=False, value=None), None, gr.update(visible=True)
 
     def TriggerStop(self, stop_event):
         if isinstance(stop_event, Event):
